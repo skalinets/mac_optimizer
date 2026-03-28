@@ -61,6 +61,6 @@ This prints raw system metrics without the AI-powered analysis.
 
 ## Requirements
 
-- macOS (tested on Apple Silicon and Intel)
+- macOS (tested on Apple Silicon only; Intel Macs have not been tested)
 - Claude Code CLI installed
 - No additional dependencies — uses only built-in macOS tools (`ps`, `vm_stat`, `sysctl`, `df`, `pmset`, etc.)
