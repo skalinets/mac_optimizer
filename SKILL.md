@@ -2,7 +2,11 @@
 name: mac-optimizer
 description: Analyze macOS performance — CPU, memory, swap, processes, browsers, containers — and provide actionable optimization recommendations. Use when the user asks to check Mac performance, optimize their system, diagnose slowness, or audit running processes.
 user-invocable: true
-allowed-tools: Bash(mac-optimize:*)
+allowed-tools: Bash(bash *)
+metadata:
+  author: skalinets
+  version: "1.1.0"
+  license: MIT
 ---
 
 # Mac Performance Optimizer
@@ -17,10 +21,16 @@ Analyzes the current state of a macOS system and provides actionable optimizatio
 
 ## How to Run
 
-Run the analysis script:
+Run the analysis script (the path is relative to where this skill is installed):
 
 ```bash
-bash /Users/serhii/work/mac_optimizer/mac-optimize.sh
+bash "$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$HOME/.claude/skills/mac-optimizer")")/mac-optimize.sh"
+```
+
+Or if the skill is installed via `npx skills add`:
+
+```bash
+bash "$HOME/.claude/skills/mac-optimizer/mac-optimize.sh"
 ```
 
 ## How to Analyze the Output

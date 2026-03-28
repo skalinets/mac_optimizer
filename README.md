@@ -17,14 +17,22 @@ Then provides prioritized recommendations (HIGH / MEDIUM / LOW impact) with copy
 
 ## Installation
 
-### Option 1: Symlink (recommended for local use)
+### Option 1: npx skills (recommended)
+
+```bash
+npx skills add skalinets/mac_optimizer -g -y
+```
+
+The `-g` flag installs globally (available across all projects). The `-y` skips confirmation prompts.
+
+### Option 2: Symlink from cloned repo
 
 ```bash
 git clone https://github.com/skalinets/mac_optimizer.git ~/work/mac_optimizer
 ln -sfn ~/work/mac_optimizer ~/.claude/skills/mac-optimizer
 ```
 
-### Option 2: Copy into skills directory
+### Option 3: Copy into skills directory
 
 ```bash
 git clone https://github.com/skalinets/mac_optimizer.git
@@ -54,7 +62,7 @@ You can also trigger it conversationally:
 The analysis script can also be run directly in your terminal:
 
 ```bash
-bash ~/work/mac_optimizer/mac-optimize.sh
+bash ~/.claude/skills/mac-optimizer/mac-optimize.sh
 ```
 
 This prints raw system metrics without the AI-powered analysis.
