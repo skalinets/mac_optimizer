@@ -78,8 +78,15 @@ sudo purge
 # Enable low power mode on battery
 sudo pmset -b lowpowermode 1
 
+# Disable a launch daemon (modern macOS — do NOT use launchctl unload)
+sudo launchctl bootout system /Library/LaunchDaemons/com.example.plist
+# Prevent it from loading on next boot
+sudo launchctl disable system/com.example.service
+
 # List and kill heavy processes
 kill -TERM <PID>
 ```
+
+**Important:** `launchctl unload` is deprecated and fails on modern macOS. Always use `launchctl bootout` / `launchctl disable` instead. These commands require `sudo` — tell the user to run them in their terminal directly.
 
 Always warn the user before suggesting `kill` — prefer `osascript -e 'quit app'` for GUI apps.
