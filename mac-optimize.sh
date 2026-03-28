@@ -2,6 +2,10 @@
 # mac-optimize.sh — Collects macOS performance data for analysis
 set -euo pipefail
 
+echo "WARNING: This output may contain sensitive information (process arguments,"
+echo "paths, usernames). Review before sharing publicly."
+echo ""
+
 echo "=== SYSTEM INFO ==="
 sysctl -n machdep.cpu.brand_string
 echo "Cores: $(sysctl -n hw.ncpu)"
@@ -31,10 +35,10 @@ echo "Total threads: $(ps -M -e | wc -l | tr -d ' ')"
 echo ""
 echo "=== BROWSER PROCESSES ==="
 for browser in "Google Chrome" "Brave Browser" "Firefox" "Safari" "Arc" "Microsoft Edge"; do
-    count=$(ps aux | grep -i "$browser" | grep -v grep | wc -l | tr -d ' ')
+    count=$(ps aux | grep -iF "$browser" | grep -v grep | wc -l | tr -d ' ')
     if [ "$count" -gt 0 ]; then
-        mem=$(ps aux | grep -i "$browser" | grep -v grep | awk '{sum+=$4} END {printf "%.1f", sum}')
-        cpu=$(ps aux | grep -i "$browser" | grep -v grep | awk '{sum+=$3} END {printf "%.1f", sum}')
+        mem=$(ps aux | grep -iF "$browser" | grep -v grep | awk '{sum+=$4} END {printf "%.1f", sum}')
+        cpu=$(ps aux | grep -iF "$browser" | grep -v grep | awk '{sum+=$3} END {printf "%.1f", sum}')
         echo "$browser: $count processes, ${mem}% RAM, ${cpu}% CPU"
     fi
 done
@@ -59,7 +63,7 @@ osascript -e 'tell application "System Events" to get the name of every login it
 
 echo ""
 echo "=== USER LAUNCH AGENTS ==="
-ls ~/Library/LaunchAgents/ 2>/dev/null || echo "None"
+ls "$HOME/Library/LaunchAgents/" 2>/dev/null || echo "None"
 
 echo ""
 echo "=== SYSTEM LAUNCH DAEMONS ==="
