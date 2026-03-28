@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # mac-optimize.sh — Collects macOS performance data for analysis
-set -euo pipefail
+set -uo pipefail
+
+# Redact sensitive patterns from process output
+redact() {
+    sed -E 's/(token|key|password|secret|credential|auth)=[^ ]*/\1=REDACTED/gi'
+}
 
 echo "WARNING: This output may contain sensitive information (process arguments,"
 echo "paths, usernames). Review before sharing publicly."
@@ -21,11 +26,11 @@ sysctl vm.swapusage
 
 echo ""
 echo "=== TOP PROCESSES BY CPU ==="
-ps aux -r | head -25
+ps auxc -r | head -25 || true
 
 echo ""
 echo "=== TOP PROCESSES BY MEMORY ==="
-ps aux -m | head -25
+ps auxc -m | head -25 || true
 
 echo ""
 echo "=== PROCESS SUMMARY ==="
@@ -45,7 +50,7 @@ done
 
 echo ""
 echo "=== CLAUDE CODE SESSIONS ==="
-ps aux | grep -w "claude" | grep -v grep | awk '{printf "PID:%s CPU:%s%% MEM:%s%% RSS:%dMB\n", $2, $3, $4, $6/1024}' || echo "None"
+ps aux | grep -w "claude" | grep -v grep | awk '{printf "PID:%s CPU:%s%% MEM:%s%% RSS:%dMB\n", $2, $3, $4, $6/1024}' | redact || echo "None"
 
 echo ""
 echo "=== DISK USAGE ==="
@@ -71,13 +76,13 @@ ls /Library/LaunchDaemons/ 2>/dev/null || echo "None"
 
 echo ""
 echo "=== HEAVY LONG-RUNNING PROCESSES (>1hr CPU time) ==="
-ps aux | awk 'NR>1 {split($10,t,":"); if(t[1]>=60 || (t[1]>=1 && length(t)==3)) printf "PID:%s CPU_TIME:%s CMD:%s\n", $2, $10, $11}' | head -20 || true
+ps aux | awk 'NR>1 {split($10,t,":"); if(t[1]>=60 || (t[1]>=1 && length(t)==3)) printf "PID:%s CPU_TIME:%s CMD:%s\n", $2, $10, $11}' | head -20 | redact || true
 
 echo ""
 echo "=== DOCKER / VM ==="
-if pgrep -q "Docker\|OrbStack\|colima\|qemu"; then
+if pgrep -q "Docker|OrbStack|colima|qemu"; then
     echo "Container runtime detected:"
-    ps aux | grep -E "Docker|OrbStack|colima|qemu" | grep -v grep | awk '{printf "PID:%s CPU:%s%% MEM:%s%% CMD:%s\n", $2, $3, $4, $11}'
+    ps aux | grep -F $'Docker\nOrbStack\ncolima\nqemu' | grep -v grep | awk '{printf "PID:%s CPU:%s%% MEM:%s%% CMD:%s\n", $2, $3, $4, $11}' | redact
 else
     echo "No container runtime detected"
 fi
