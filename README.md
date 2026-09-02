@@ -12,6 +12,7 @@ Collects and analyzes:
 - Docker / OrbStack container runtimes
 - Launch daemons and agents from third-party apps
 - Disk space, system uptime, power settings
+- Battery drain: health vs design capacity, live discharge in watts, processes by power impact, dark wakes, sleep assertions
 
 Then provides prioritized recommendations (HIGH / MEDIUM / LOW impact) with copy-pasteable commands.
 
@@ -57,18 +58,40 @@ You can also trigger it conversationally:
 - "Why is my Mac slow?"
 - "Optimize my system"
 
-## Running the Script Standalone
+## Battery Mode
 
-The analysis script can also be run directly in your terminal:
+Ask "why does my battery drain so fast?" and the skill switches to battery mode. It runs `mac-battery.sh`, then fans out to four agents in parallel:
+
+| Agent | Model | Job |
+|---|---|---|
+| battery-health-analyst | haiku | Hardware health, watts, hardware vs software share of the shortfall |
+| sleep-wake-auditor | haiku | Dark wakes, sleep assertions, `pmset -b` fixes |
+| power-hog-hunter | sonnet | Which processes burn power now, what they are, how to stop them |
+| background-services-auditor | sonnet | Launch agents, login items, chat/sync/VPN apps worth disabling |
+
+The two data-parsing agents run on Haiku because their work is arithmetic against fixed thresholds. The two that must recognize unknown software run on Sonnet. Synthesis stays on the main model.
+
+The agent prompts live in `agents/`. The skill reads them at runtime, so no extra install is needed. To address them by name from any session, copy them into your agents directory:
+
+```bash
+cp ~/.claude/skills/mac-optimizer/agents/*.md ~/.claude/agents/
+```
+
+Not possible without `sudo`: per-process watts, GPU and display power. The skill prints the `powermetrics` command for you to run yourself. Mapping a browser renderer to a tab is not possible from the CLI at all — use the browser's task manager.
+
+## Running the Scripts Standalone
+
+The analysis scripts can also be run directly in your terminal:
 
 ```bash
 bash ~/.claude/skills/mac-optimizer/mac-optimize.sh
+bash ~/.claude/skills/mac-optimizer/mac-battery.sh
 ```
 
-This prints raw system metrics without the AI-powered analysis.
+These print raw system metrics without the AI-powered analysis.
 
 ## Requirements
 
 - macOS (tested on Apple Silicon only; Intel Macs have not been tested)
 - Claude Code CLI installed
-- No additional dependencies — uses only built-in macOS tools (`ps`, `vm_stat`, `sysctl`, `df`, `pmset`, etc.)
+- No additional dependencies — uses only built-in macOS tools (`ps`, `vm_stat`, `sysctl`, `df`, `pmset`, `ioreg`, `top`, etc.)
